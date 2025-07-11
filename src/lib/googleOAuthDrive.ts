@@ -9,7 +9,7 @@ function getEnv(key: string, fallback?: string): string {
     console.warn(`Warning: Using fallback for env var ${key}`);
     return fallback;
   }
-  throw new Error(`Missing required environment variable: ${key}`);
+  throw new Error(`Missing requiredddd environment variable: ${key}`);
 }
 
 export function getOAuth2Client() {
