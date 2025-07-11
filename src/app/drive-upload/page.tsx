@@ -27,7 +27,7 @@ export default function DriveUploadPage() {
       const json = (await res.json()) as { tokens?: Record<string, unknown>; error?: string };
       if (json.tokens) {
         setTokens(json.tokens);
-        setStatus("Authenticated! You can now upload files.");
+        setStatus("Authenticateddd! You can now upload files.");
       } else {
         setStatus(json.error || "OAuth failed");
       }
