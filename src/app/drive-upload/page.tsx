@@ -12,6 +12,17 @@ interface UploadResult {
   webContentLink?: string;
 }
 
+interface AuthCallbackResponse {
+  tokens?: Record<string, unknown>;
+  error?: string;
+}
+
+interface UploadResponse {
+  success?: boolean;
+  file?: UploadResult;
+  error?: string;
+}
+
 export default function DriveUploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [tokens, setTokens] = useState<Record<string, unknown> | null>(null);
@@ -64,7 +75,7 @@ export default function DriveUploadPage() {
           throw new Error(errorData.error || 'Authentication failed');
         }
         
-        const json = await res.json() as { tokens?: any; error?: string };
+        const json = await res.json() as AuthCallbackResponse;
         
         if (json.tokens) {
           setTokens(json.tokens);
@@ -108,7 +119,7 @@ export default function DriveUploadPage() {
         throw new Error(errorData.error || 'Upload failed');
       }
       
-      const json = await res.json() as { success?: boolean; file?: any; error?: string };
+      const json = await res.json() as UploadResponse;
       
       if (json.success && json.file) {
         setStatus("✅ Upload successful!");
