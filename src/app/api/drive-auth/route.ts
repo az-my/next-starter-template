@@ -1,7 +1,6 @@
-import { NextRequest } from "next/server";
 import { getAuthUrl } from "@/lib/googleOAuthDrive";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Generate a unique state parameter for security, always including 'drive-upload-'
     const state = `drive-upload-${crypto.randomUUID()}`;

@@ -27,11 +27,11 @@ export default function DriveUploadPage() {
       
       const res = await fetch("/api/drive-auth");
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json() as { error?: string };
         throw new Error(errorData.error || 'Failed to get auth URL');
       }
       
-      const { url } = await res.json();
+      const { url } = await res.json() as { url: string };
       window.location.href = url;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
@@ -60,11 +60,11 @@ export default function DriveUploadPage() {
         });
         
         if (!res.ok) {
-          const errorData = await res.json();
+          const errorData = await res.json() as { error?: string };
           throw new Error(errorData.error || 'Authentication failed');
         }
         
-        const json = await res.json();
+        const json = await res.json() as { tokens?: any; error?: string };
         
         if (json.tokens) {
           setTokens(json.tokens);
@@ -104,11 +104,11 @@ export default function DriveUploadPage() {
       });
       
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json() as { error?: string };
         throw new Error(errorData.error || 'Upload failed');
       }
       
-      const json = await res.json();
+      const json = await res.json() as { success?: boolean; file?: any; error?: string };
       
       if (json.success && json.file) {
         setStatus("✅ Upload successful!");
@@ -141,7 +141,7 @@ export default function DriveUploadPage() {
         const parsedTokens = JSON.parse(stored);
         setTokens(parsedTokens);
         setStatus("✅ Using saved authentication");
-      } catch (err) {
+      } catch {
         localStorage.removeItem("drive_oauth_tokens");
         handleOAuthCallback();
       }

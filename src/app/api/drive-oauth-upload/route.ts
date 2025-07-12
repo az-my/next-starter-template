@@ -113,25 +113,10 @@ export async function POST(request: NextRequest) {
       }
     });
     
-  } catch (error) {
-    console.error('Drive upload error:', error);
-    
-    let errorMessage = 'Unknown error occurred';
-    let errorCode = 'UPLOAD_ERROR';
-    
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      
-      // Categorize errors
-      if (error.message.includes('access_token')) {
-        errorCode = 'TOKEN_EXPIRED';
-      } else if (error.message.includes('quota')) {
-        errorCode = 'QUOTA_EXCEEDED';
-      } else if (error.message.includes('permission')) {
-        errorCode = 'PERMISSION_DENIED';
-      }
-    }
-    
+  } catch {
+    console.error('Drive upload error');
+    const errorMessage = 'Unknown error occurred';
+    const errorCode = 'UPLOAD_ERROR';
     return Response.json(
       { 
         error: errorMessage,
