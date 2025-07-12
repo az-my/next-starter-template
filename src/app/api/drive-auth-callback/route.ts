@@ -1,15 +1,62 @@
 import { NextRequest } from "next/server";
 import { getTokensFromCode } from "@/lib/googleOAuthDrive";
 
-export async function POST(req: NextRequest) {
-  const body = await req.json() as { code?: string };
-  const { code } = body;
-  if (!code) return new Response(JSON.stringify({ error: "Missing code" }), { status: 400 });
+export async function POST(request: NextRequest) {
   try {
+    const body = await request.json() as { 
+      code?: string; 
+      state?: string;
+    };
+    
+    const { code, state } = body;
+    
+    if (!code) {
+      return Response.json(
+        { 
+          error: "Missing authorization code",
+          code: 'MISSING_CODE'
+        }, 
+        { status: 400 }
+      );
+    }
+    
+    // Validate state parameter if provided
+    if (!state || !state.startsWith('drive-upload-')) {
+      return Response.json(
+        { 
+          error: "Invalid state parameter",
+          code: 'INVALID_STATE'
+        }, 
+        { status: 400 }
+      );
+    }
+    
     const tokens = await getTokensFromCode(code);
-    return new Response(JSON.stringify({ tokens }), { status: 200 });
-  } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
+    
+    return Response.json({ 
+      tokens,
+      success: true
+    }, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    });
+    
+  } catch (error) {
+    console.error("OAuth callback error:", error);
+    
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : "Unknown error occurred";
+    
+    return Response.json(
+      { 
+        error: errorMessage,
+        code: 'CALLBACK_ERROR'
+      }, 
+      { status: 500 }
+    );
   }
 }
