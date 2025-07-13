@@ -1,3 +1,30 @@
+// Helper to decode base64 and upload to Drive
+import { getDriveFolderId } from "./googleOAuthDrive";
+import mime from "mime-types";
+
+/**
+ * Decodes a base64 string and uploads it to Google Drive.
+ * @param {string} base64 - The base64 string (with or without data URL prefix)
+ * @param {string} fileName - The name for the file in Drive
+ * @returns {Promise<string>} - The webViewLink of the uploaded file
+ */
+export async function uploadBase64ImageToDrive(base64: string, fileName: string): Promise<string> {
+  // Remove data URL prefix if present
+  const matches = base64.match(/^data:(.+);base64,(.*)$/);
+  let mimeType = "image/jpeg";
+  let data = base64;
+  if (matches) {
+    mimeType = matches[1];
+    data = matches[2];
+  }
+  const buffer = Buffer.from(data, "base64");
+  // Try to get extension from mimeType
+  const ext = mime.extension(mimeType) || "jpg";
+  const finalFileName = fileName.endsWith(`.${ext}`) ? fileName : `${fileName}.${ext}`;
+  const folderId = getDriveFolderId();
+  const result = await uploadToDrive(buffer, mimeType, finalFileName, folderId);
+  return result.webViewLink || result.id || "";
+}
 import { google } from "googleapis";
 import path from "path";
 import { Readable } from "stream";

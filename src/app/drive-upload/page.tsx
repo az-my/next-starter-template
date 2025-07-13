@@ -4,17 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Upload, FileText, ExternalLink, Download } from "lucide-react";
+import { useOAuth } from "@/hooks/useOAuth";
 
 interface UploadResult {
   id: string;
   name: string;
   webViewLink?: string;
   webContentLink?: string;
-}
-
-interface AuthCallbackResponse {
-  tokens?: Record<string, unknown>;
-  error?: string;
 }
 
 interface UploadResponse {
@@ -25,31 +21,26 @@ interface UploadResponse {
 
 export default function DriveUploadPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [tokens, setTokens] = useState<Record<string, unknown> | null>(null);
   const [status, setStatus] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  
+  const { 
+    isAuthenticated, 
+    tokens, 
+    error, 
+    isLoading, 
+    login, 
+    handleCallback, 
+    getValidTokens 
+  } = useOAuth();
 
   async function handleLogin() {
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      const res = await fetch("/api/drive-auth");
-      if (!res.ok) {
-        const errorData = await res.json() as { error?: string };
-        throw new Error(errorData.error || 'Failed to get auth URL');
-      }
-      
-      const { url } = await res.json() as { url: string };
-      window.location.href = url;
+      await login();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
-      setError(errorMessage);
-      setStatus("Login failed");
-    } finally {
-      setIsLoading(false);
+      setStatus(`❌ Login failed: ${errorMessage}`);
     }
   }
 
@@ -60,54 +51,33 @@ export default function DriveUploadPage() {
     
     if (code) {
       try {
-        setIsLoading(true);
-        setError(null);
         setStatus("Authenticating with Google...");
-        
-        const res = await fetch("/api/drive-auth-callback", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code, state }),
-        });
-        
-        if (!res.ok) {
-          const errorData = await res.json() as { error?: string };
-          throw new Error(errorData.error || 'Authentication failed');
-        }
-        
-        const json = await res.json() as AuthCallbackResponse;
-        
-        if (json.tokens) {
-          setTokens(json.tokens);
-          setStatus("✅ Authenticated! You can now upload files.");
-          // Clear URL parameters
-          window.history.replaceState({}, document.title, window.location.pathname);
-        } else {
-          throw new Error(json.error || "OAuth failed");
-        }
+        await handleCallback(code, state || undefined);
+        setStatus("✅ Authenticated! You can now upload files.");
+        // Clear URL parameters
+        window.history.replaceState({}, document.title, window.location.pathname);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
-        setError(errorMessage);
-        setStatus("❌ Authentication failed");
-      } finally {
-        setIsLoading(false);
+        setStatus(`❌ Authentication failed: ${errorMessage}`);
       }
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file || !tokens) return;
+    if (!file || !isAuthenticated) return;
     
     try {
-      setIsLoading(true);
-      setError(null);
+      setUploadLoading(true);
       setStatus("Uploading...");
       setUploadResult(null);
       
+      // Get valid tokens (will refresh if needed)
+      const validTokens = await getValidTokens();
+      
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("tokens", JSON.stringify(tokens));
+      formData.append("tokens", JSON.stringify(validTokens));
       
       const res = await fetch("/api/drive-oauth-upload", {
         method: "POST",
@@ -130,36 +100,23 @@ export default function DriveUploadPage() {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Upload failed';
-      setError(errorMessage);
-      setStatus("❌ Upload failed");
+      setStatus(`❌ Upload failed: ${errorMessage}`);
     } finally {
-      setIsLoading(false);
+      setUploadLoading(false);
     }
   }
 
-  // Persist tokens in localStorage after login
+  // Handle OAuth callback on mount
   useEffect(() => {
-    if (tokens) {
-      localStorage.setItem("drive_oauth_tokens", JSON.stringify(tokens));
-    }
-  }, [tokens]);
-
-  // On mount, check for tokens in localStorage and handle OAuth callback
-  useEffect(() => {
-    const stored = localStorage.getItem("drive_oauth_tokens");
-    if (stored) {
-      try {
-        const parsedTokens = JSON.parse(stored);
-        setTokens(parsedTokens);
-        setStatus("✅ Using saved authentication");
-      } catch {
-        localStorage.removeItem("drive_oauth_tokens");
-        handleOAuthCallback();
-      }
-    } else {
-      handleOAuthCallback();
-    }
+    handleOAuthCallback();
   }, []);
+
+  // Update status based on authentication state
+  useEffect(() => {
+    if (isAuthenticated && !status.includes('Uploading') && !status.includes('Upload')) {
+      setStatus("✅ Using saved authentication");
+    }
+  }, [isAuthenticated, status]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
@@ -175,7 +132,7 @@ export default function DriveUploadPage() {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {!tokens ? (
+          {!isAuthenticated ? (
             <div className="text-center">
               <Button 
                 onClick={handleLogin} 
@@ -216,10 +173,10 @@ export default function DriveUploadPage() {
               
               <Button 
                 type="submit" 
-                disabled={!file || isLoading}
+                disabled={!file || uploadLoading}
                 className="w-full"
               >
-                {isLoading ? (
+                {uploadLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Uploading...
