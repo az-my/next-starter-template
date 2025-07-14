@@ -1,6 +1,3 @@
-import { google } from "googleapis";
-
-const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
 const TOKEN_STORAGE_KEY = "google_oauth_tokens";
 
 interface OAuthTokens {
@@ -19,7 +16,7 @@ interface OAuthState {
 
 class OAuthService {
   private static instance: OAuthService;
-  private oauth2Client: any;
+  private oauth2Client: unknown;
   private listeners: ((state: OAuthState) => void)[] = [];
   private currentState: OAuthState = {
     isAuthenticated: false,
@@ -121,7 +118,7 @@ class OAuthService {
     return { ...this.currentState };
   }
 
-  public async getAuthUrl(state?: string): Promise<string> {
+  public async getAuthUrl(): Promise<string> {
     try {
       const response = await fetch('/api/oauth/auth', {
         method: 'GET',
@@ -144,14 +141,14 @@ class OAuthService {
     }
   }
 
-  public async handleAuthCallback(code: string, state?: string): Promise<OAuthTokens> {
+  public async handleAuthCallback(code: string): Promise<OAuthTokens> {
     try {
       const response = await fetch('/api/oauth/callback', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ code, state }),
+        body: JSON.stringify({ code }),
       });
 
       if (!response.ok) {

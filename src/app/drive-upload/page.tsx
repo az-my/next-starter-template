@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -27,7 +27,6 @@ export default function DriveUploadPage() {
   
   const { 
     isAuthenticated, 
-    tokens, 
     error, 
     isLoading, 
     login, 
@@ -44,7 +43,7 @@ export default function DriveUploadPage() {
     }
   }
 
-  async function handleOAuthCallback() {
+  const handleOAuthCallback = useCallback(async () => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
     const state = params.get("state");
@@ -61,7 +60,7 @@ export default function DriveUploadPage() {
         setStatus(`❌ Authentication failed: ${errorMessage}`);
       }
     }
-  }
+  }, [handleCallback]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -109,7 +108,7 @@ export default function DriveUploadPage() {
   // Handle OAuth callback on mount
   useEffect(() => {
     handleOAuthCallback();
-  }, []);
+  }, [handleOAuthCallback]);
 
   // Update status based on authentication state
   useEffect(() => {

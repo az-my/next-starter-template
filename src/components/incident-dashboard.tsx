@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { RefreshCw, Database, Cloud, FileText, AlertCircle, CheckCircle, Clock, Filter } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
@@ -67,9 +67,9 @@ export default function IncidentDashboard() {
   const [filter, setFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [syncFilter, setSyncFilter] = useState('all');
-  const { tokens, isAuthenticated } = useOAuth();
+  const { } = useOAuth();
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -86,7 +86,7 @@ export default function IncidentDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const calculateStats = (data: IncidentRecord[]) => {
     const total = data.length;
@@ -148,7 +148,7 @@ export default function IncidentDashboard() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   return (
     <div className="space-y-6">

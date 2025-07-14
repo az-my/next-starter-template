@@ -50,7 +50,7 @@ export default function Home() {
         body: JSON.stringify({ tokens }),
       });
 
-      const json: any = await res.json();
+      const json: Record<string, unknown> = await res.json();
 
       if (!res.ok) {
         let errorMessage = "Unknown error occurred";
@@ -82,10 +82,10 @@ export default function Home() {
             JSON.stringify(json?.results || json, null, 2),
         });
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setDebugDialog({
         title: "Sync Exception",
-        message: e?.message || String(e),
+        message: e instanceof Error ? e.message : String(e),
         error: e,
       });
     } finally {

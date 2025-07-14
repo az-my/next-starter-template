@@ -12,25 +12,6 @@ const supabase = createClient(
 );
 
 // Define the incident serpo data structure
-type IncidentSerpoRow = {
-  id: string;
-  id_incident: string;
-  crossing_zona: string;
-  foto_odo_awal?: string;
-  foto_tim_awal?: string;
-  foto_odo_akhir?: string;
-  foto_tim_akhir?: string;
-  started_at?: string;
-  stopped_at?: string;
-  duration?: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  created_by?: string;
-  description?: string;
-  is_synced_to_sheet?: boolean;
-  is_image_uploaded?: boolean;
-};
 
 // Default spreadsheet and sheet configuration
 const DEFAULT_SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
@@ -94,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     // Fetch incident data from Supabase
     const { data, error } = await supabase
-      .from<IncidentSerpoRow>('incident_serpo')
+      .from('incident_serpo')
       .select('*')
       .eq('is_synced_to_sheet', false)
       .limit(100); // Limit to prevent overwhelming the API
@@ -146,9 +127,9 @@ export async function POST(req: NextRequest) {
           }
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       return NextResponse.json(
-        { error: `Failed to access or create spreadsheet: ${err.message}` },
+        { error: `Failed to access or create spreadsheet: ${err instanceof Error ? err.message : String(err)}` },
         { status: 400 }
       );
     }
@@ -216,10 +197,10 @@ export async function POST(req: NextRequest) {
       updatedCells: appendResult.data.updatedCells
     });
 
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Error syncing to Google Sheets:', e);
     return NextResponse.json(
-      { error: `Failed to sync to Google Sheets: ${e.message}` },
+      { error: `Failed to sync to Google Sheets: ${e instanceof Error ? e.message : String(e)}` },
       { status: 500 }
     );
   }

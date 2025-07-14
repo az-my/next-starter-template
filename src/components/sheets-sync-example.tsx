@@ -161,7 +161,7 @@ export function SheetsSyncExample() {
             <>
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>• Exports incident data from Supabase to Google Sheets</p>
-                <p>• Creates the sheet if it doesn't exist</p>
+                <p>• Creates the sheet if it doesn&apos;t exist</p>
                 <p>• Adds headers automatically</p>
                 <p>• Marks synced records to avoid duplicates</p>
               </div>
