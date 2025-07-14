@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { oauthService, OAuthState, OAuthTokens } from '@/lib/oauthService';
+import { oauthService, OAuthState, OAuthTokens } from './oauthService';
 
 export function useOAuth() {
   const [state, setState] = useState<OAuthState>(oauthService.getState());
@@ -79,4 +79,4 @@ export function useOAuth() {
     getValidTokens,
     refreshTokens,
   };
-}
+} 

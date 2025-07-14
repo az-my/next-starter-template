@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getTokensFromCode } from "@/lib/googleOAuthDrive";
+import { getTokensFromCode } from '@/features/oauth/googleOAuthDrive';
 
 export async function POST(request: NextRequest) {
   try {

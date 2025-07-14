@@ -1,4 +1,4 @@
-import { getAuthUrl } from "@/lib/googleOAuthDrive";
+import { getAuthUrl } from '@/features/oauth/googleOAuthDrive';
 
 export async function GET() {
   try {

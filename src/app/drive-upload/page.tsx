@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Upload, FileText, ExternalLink, Download } from "lucide-react";
-import { useOAuth } from "@/hooks/useOAuth";
+import { useOAuth } from "@/features/oauth/useOAuth";
 
 interface UploadResult {
   id: string;
@@ -42,24 +42,6 @@ export default function DriveUploadPage() {
       setStatus(`❌ Login failed: ${errorMessage}`);
     }
   }
-
-  const handleOAuthCallback = useCallback(async () => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    
-    if (code) {
-      try {
-        setStatus("Authenticating with Google...");
-        await handleCallback(code);
-        setStatus("✅ Authenticated! You can now upload files.");
-        // Clear URL parameters
-        window.history.replaceState({}, document.title, window.location.pathname);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
-        setStatus(`❌ Authentication failed: ${errorMessage}`);
-      }
-    }
-  }, [handleCallback]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -103,11 +85,6 @@ export default function DriveUploadPage() {
       setUploadLoading(false);
     }
   }
-
-  // Handle OAuth callback on mount
-  useEffect(() => {
-    handleOAuthCallback();
-  }, [handleOAuthCallback]);
 
   // Update status based on authentication state
   useEffect(() => {
