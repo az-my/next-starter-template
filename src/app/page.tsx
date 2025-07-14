@@ -56,13 +56,13 @@ export default function Home() {
         let errorMessage = "Unknown error occurred";
         
         if (res.status === 500 && json?.error) {
-          if (json.error.includes("Missing required environment variable")) {
+          if (typeof json.error === "string" && json.error.includes("Missing required environment variable")) {
             errorMessage = "Server configuration error: Missing required environment variables. Please check your .env.local file.";
-          } else if (json.error.includes("SUPABASE")) {
+          } else if (typeof json.error === "string" && json.error.includes("SUPABASE")) {
             errorMessage = "Database connection error: Please check your Supabase configuration.";
-          } else if (json.error.includes("GOOGLE")) {
+          } else if (typeof json.error === "string" && json.error.includes("GOOGLE")) {
             errorMessage = "Google API error: Please check your Google OAuth configuration.";
-          } else {
+          } else if (typeof json.error === "string") {
             errorMessage = json.error;
           }
         } else if (typeof json?.error === "string") {
@@ -75,11 +75,15 @@ export default function Home() {
           error: json,
         });
       } else {
+        // Ensure message is always a string and handle possible object types safely
         setDebugDialog({
           title: "Sync Result",
           message:
-            json?.message ||
-            JSON.stringify(json?.results || json, null, 2),
+            typeof json?.message === "string"
+              ? json.message
+              : json?.message !== undefined
+                ? JSON.stringify(json.message, null, 2)
+                : JSON.stringify(json?.results ?? json, null, 2),
         });
       }
     } catch (e: unknown) {
