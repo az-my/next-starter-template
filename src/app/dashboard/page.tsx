@@ -18,6 +18,12 @@ import { Button } from "@/components/ui/button"
 import * as React from "react"
 import { useSearchParams } from "next/navigation"
 
+type SyncDriveResponse = {
+  message?: string;
+  results?: unknown;
+  error?: unknown;
+};
+
 export default function Page() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -28,12 +34,19 @@ export default function Page() {
     setLoading(true);
     try {
       const res = await fetch("/api/incident-serpo-sync-drive", { method: "POST" });
-      const json = await res.json() as any;
-      alert(typeof json === "object" && json !== null && "message" in json
-        ? (json as { message?: string }).message
-        : JSON.stringify(json.results || json.error || json));
-    } catch (e: any) {
-      alert("Sync failed: " + (e && typeof e === "object" && "message" in e ? (e as { message?: string }).message : String(e)));
+      const json = (await res.json()) as SyncDriveResponse;
+      alert(
+        typeof json === "object" && json !== null && "message" in json
+          ? json.message
+          : JSON.stringify(json.results || json.error || json)
+      );
+    } catch (e: unknown) {
+      alert(
+        "Sync failed: " +
+          (e && typeof e === "object" && "message" in e
+            ? (e as { message?: string }).message
+            : String(e))
+      );
     } finally {
       setLoading(false);
     }
