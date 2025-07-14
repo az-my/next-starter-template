@@ -23,6 +23,15 @@ import {
 import { useOAuth } from "@/hooks/useOAuth";
 import { OAuthExample } from "@/components/oauth-example";
 
+type ApiResult = {
+  file?: { name?: string };
+  error?: string;
+  message?: string;
+  recordCount?: number;
+  spreadsheetId?: string;
+  sheetName?: string;
+};
+
 /**
  * Comprehensive OAuth Management Dashboard Component
  * Provides a centralized interface for managing Google OAuth authentication
@@ -65,7 +74,7 @@ export function OAuthDashboard() {
         body: formData,
       });
       
-      const result = await response.json();
+      const result = await response.json() as ApiResult;
       
       if (response.ok) {
         setUploadResult(`✅ File uploaded successfully: ${result.file?.name}`);
@@ -93,7 +102,7 @@ export function OAuthDashboard() {
         body: JSON.stringify({ tokens: validTokens }),
       });
       
-      const result = await response.json();
+      const result = await response.json() as ApiResult;
       
       if (response.ok) {
         setSyncResult(`✅ Sync completed: ${result.message || 'Success'}`);
@@ -140,7 +149,7 @@ export function OAuthDashboard() {
         }),
       });
 
-      const result = await response.json();
+      const result = await response.json() as ApiResult;
       if (response.ok) {
         setSheetsSyncResult(`✅ Sheets sync completed: ${result.message}\nRecords synced: ${result.recordCount}\nSpreadsheet: ${result.spreadsheetId}\nSheet: ${result.sheetName}`);
       } else {

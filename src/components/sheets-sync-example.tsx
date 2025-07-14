@@ -16,6 +16,14 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+type SheetsSyncResult = {
+  message?: string;
+  recordCount?: number;
+  spreadsheetId?: string;
+  sheetName?: string;
+  error?: string;
+};
+
 export function SheetsSyncExample() {
   const { isAuthenticated, login, logout, getValidTokens } = useOAuth();
   const [syncLoading, setSyncLoading] = useState(false);
@@ -56,10 +64,11 @@ export function SheetsSyncExample() {
       });
 
       const result = await response.json();
+      const syncResultObj = result as SheetsSyncResult;
       if (response.ok) {
-        setSyncResult(`✅ Success: ${result.message}\n📊 Records synced: ${result.recordCount}\n📋 Spreadsheet: ${result.spreadsheetId}\n📄 Sheet: ${result.sheetName}`);
+        setSyncResult(`✅ Success: ${syncResultObj.message}\n📊 Records synced: ${syncResultObj.recordCount}\n📋 Spreadsheet: ${syncResultObj.spreadsheetId}\n📄 Sheet: ${syncResultObj.sheetName}`);
       } else {
-        setSyncResult(`❌ Failed: ${result.error}`);
+        setSyncResult(`❌ Failed: ${syncResultObj.error}`);
       }
     } catch (error) {
       setSyncResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);

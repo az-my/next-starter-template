@@ -46,12 +46,11 @@ export default function DriveUploadPage() {
   const handleOAuthCallback = useCallback(async () => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
-    const state = params.get("state");
     
     if (code) {
       try {
         setStatus("Authenticating with Google...");
-        await handleCallback(code, state || undefined);
+        await handleCallback(code);
         setStatus("✅ Authenticated! You can now upload files.");
         // Clear URL parameters
         window.history.replaceState({}, document.title, window.location.pathname);

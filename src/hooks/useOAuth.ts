@@ -24,10 +24,10 @@ export function useOAuth() {
     }
   }, []);
 
-  const handleCallback = useCallback(async (code: string, state?: string) => {
+  const handleCallback = useCallback(async (code: string) => {
     try {
       setIsLoading(true);
-      const tokens = await oauthService.handleAuthCallback(code, state);
+      const tokens = await oauthService.handleAuthCallback(code);
       return tokens;
     } catch (error) {
       console.error('Callback handling failed:', error);

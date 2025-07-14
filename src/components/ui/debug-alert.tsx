@@ -16,7 +16,9 @@ export function DebugAlert({ title, message, error, onClose }: DebugAlertProps) 
           {title && <AlertTitle>{title}</AlertTitle>}
           <AlertDescription>
             <div className="whitespace-pre-wrap break-all">{message}</div>
-            {error && (
+
+            {/* coerce error to boolean so the expression can only be `boolean | ReactNode` */}
+            {!!error && (
               <pre className="mt-2 text-xs text-red-500 bg-red-50 dark:bg-zinc-800 p-2 rounded">
                 {typeof error === "string"
                   ? error
@@ -27,6 +29,7 @@ export function DebugAlert({ title, message, error, onClose }: DebugAlertProps) 
             )}
           </AlertDescription>
         </Alert>
+
         <button
           className="absolute top-2 right-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
           onClick={onClose}

@@ -131,7 +131,7 @@ class OAuthService {
         throw new Error('Failed to get auth URL');
       }
 
-      const data = await response.json();
+      const data = await response.json() as { url: string };
       return data.url;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to get auth URL';
@@ -152,12 +152,12 @@ class OAuthService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as { error?: string };
         throw new Error(errorData.error || 'Authentication failed');
       }
 
-      const data = await response.json();
-      const tokens = data.tokens as OAuthTokens;
+      const data = await response.json() as { tokens: OAuthTokens };
+      const tokens = data.tokens;
       
       this.setTokens(tokens);
       return tokens;
@@ -184,12 +184,12 @@ class OAuthService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as { error?: string };
         throw new Error(errorData.error || 'Token refresh failed');
       }
 
-      const data = await response.json();
-      const tokens = data.tokens as OAuthTokens;
+      const data = await response.json() as { tokens: OAuthTokens };
+      const tokens = data.tokens;
       
       this.setTokens(tokens);
       return tokens;
