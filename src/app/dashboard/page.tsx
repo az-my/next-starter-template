@@ -1,30 +1,48 @@
 "use client";
-import { useOAuth } from "@/features/oauth/useOAuth";
-import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUser } from "./hooks/useUser";
+import { DashboardLayout } from "./components/DashboardLayout";
+import { OverviewTab } from "./components/OverviewTab";
+import { IncidentsTab } from "./components/IncidentsTab";
+import { SettingsTab } from "./components/SettingsTab";
 
 export default function DashboardPage() {
-  const { tokens, isAuthenticated } = useOAuth();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    // Prevent hydration mismatch by rendering nothing until client-side
+  const router = useRouter();
+  const { user, loading, error, googleTokens } = useUser();
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  // Redirect if not logged in
+  if (!loading && !user) {
+    router.replace("/");
     return null;
   }
 
-  if (!isAuthenticated) {
-    return <div>Please log in to view your dashboard.</div>;
-  }
-
   return (
-    <div style={{ maxWidth: 600, margin: "2rem auto", padding: 24, background: "#fff", borderRadius: 8 }}>
-      <h2>OAuth Token Information</h2>
-      <pre style={{ background: "#f5f5f5", padding: 16, borderRadius: 4 }}>
-        {JSON.stringify(tokens, null, 2)}
-      </pre>
-    </div>
+    <DashboardLayout loading={loading} error={error}>
+      <main className="flex flex-col gap-8 p-6 w-full h-full">
+        <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3 md:w-auto">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="incidents">Incidents</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+        
+          <TabsContent value="overview" className="mt-6">
+            <OverviewTab user={user} googleTokens={googleTokens} />
+          </TabsContent>
+        
+          <TabsContent value="incidents" className="mt-6">
+            <IncidentsTab googleTokens={googleTokens} />
+          </TabsContent>
+          
+          <TabsContent value="settings" className="mt-6">
+            <SettingsTab />
+          </TabsContent>
+        </Tabs>
+      </main>
+    </DashboardLayout>
   );
 }
