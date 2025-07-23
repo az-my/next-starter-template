@@ -68,17 +68,16 @@
     "wrangler": "4.21.x"
   },
   "private": true,
-  "scripts": {
-    "build": "next build",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts",
-    "check": "npm run build && tsc",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "dev": "next dev --turbopack",
-    "lint": "next lint",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "start": "next start",
-    "test:oauth": "node scripts/test-oauth.js",
-    "prebuild": "next lint && tsc --noEmit",
-    "analyze": "ANALYZE=true next build"
-  }
+"scripts": {
+  "build": "npm run lint && npm run build:next && npm run build:opennext",
+  "build:next": "next build",
+  "build:opennext": "opennextjs-cloudflare build",
+  "lint": "next lint && tsc --noEmit",
+  "dev": "next dev --turbopack",
+  "start": "next start",
+  "preview": "npm run build && opennextjs-cloudflare preview",
+  "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts",
+  "test:oauth": "node scripts/test-oauth.js",
+  "analyze": "ANALYZE=true next build"
+}
 }
