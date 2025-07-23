@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { User } from "@/app/dashboard/components/UserDetailsCard";
 
-export function AppTopbar({ user }: { user?: any }) {
+export function AppTopbar({ user }: { user?: User }) {
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User";
   const avatarUrl = user?.user_metadata?.avatar_url;
 

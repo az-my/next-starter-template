@@ -1,6 +1,6 @@
 import { Table } from "@/components/ui/table";
 
-export function DataTable({ data }: { data: any[] }) {
+export function DataTable<T extends object>({ data }: { data: T[] }) {
   if (!data || !data.length) return <div className="text-muted-foreground">No data available.</div>;
   const columns = Object.keys(data[0]);
   return (
@@ -17,7 +17,7 @@ export function DataTable({ data }: { data: any[] }) {
           {data.map((row, i) => (
             <tr key={i} className="border-t">
               {columns.map((col) => (
-                <td key={col} className="px-4 py-2 text-sm">{row[col]}</td>
+                <td key={col} className="px-4 py-2 text-sm">{String((row as Record<string, unknown>)[col])}</td>
               ))}
             </tr>
           ))}

@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { IncidentSerpo } from "@/types/incident-serpo";
 import { useIncidentSerpoList } from "./useIncidentSerpoList";
+import type { GoogleTokens } from '@/types/google-tokens';
 
 interface UseIncidentManagementProps {
-  googleTokens: any;
+  googleTokens: GoogleTokens | null;
+}
+
+interface SheetsPostResponse {
+  error?: string;
+  success?: boolean;
 }
 
 export function useIncidentManagement({ googleTokens }: UseIncidentManagementProps) {
@@ -28,13 +34,13 @@ export function useIncidentManagement({ googleTokens }: UseIncidentManagementPro
         }),
       });
       
-      const result = await res.json() as any;
+      const result = await res.json() as SheetsPostResponse;
       if (!res.ok) throw new Error(result.error || "Sheet sync failed");
       
       // Refetch incidents to get updated sync status
       await refetch();
-    } catch (error: any) {
-      setSyncError(error.message);
+    } catch (error: unknown) {
+      setSyncError(error instanceof Error ? error.message : 'An unknown error occurred');
       console.error('Sync error:', error);
     } finally {
       setSyncingId(null);

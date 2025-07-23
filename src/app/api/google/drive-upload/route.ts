@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { GoogleTokens } from '@/types/google-tokens';
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Helper: refresh access token if expired (Cloudflare-compatible)
-  async function getValidAccessToken(tokens: any): Promise<string> {
+  async function getValidAccessToken(tokens: GoogleTokens): Promise<string> {
     const now = Date.now();
     if (tokens.expiry_date && tokens.expiry_date > now && tokens.access_token) {
       return tokens.access_token;
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params.toString(),
     });
-    const json = await resp.json() as any;
+    const json = await resp.json() as { access_token?: string; error_description?: string };
     if (!resp.ok || !json.access_token) {
       throw new Error(json.error_description || "Failed to refresh access token");
     }
@@ -66,15 +67,22 @@ export async function POST(req: NextRequest) {
       body: multipartBody,
     });
     const raw = await res.text();
-    let result: any;
+    let result: unknown;
     try {
       result = JSON.parse(raw);
     } catch {
       result = raw;
     }
-    if (!res.ok) throw new Error((result.error && result.error.message) ? result.error.message : "Google Drive API error");
+    if (!res.ok) {
+      if (typeof result === "object" && result !== null && "error" in result) {
+        const errorObj = result as { error?: { message?: string } };
+        throw new Error(errorObj.error?.message || "Google Drive API error");
+      }
+      throw new Error("Google Drive API error");
+    }
     return NextResponse.json({ success: true, result, raw });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

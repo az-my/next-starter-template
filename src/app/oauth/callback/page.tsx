@@ -19,8 +19,11 @@ export default function GoogleOAuthCallback() {
         .then(async (res) => {
           if (!res.ok) {
             const error = await res.json();
-            const errObj = error as any;
-            alert("Google OAuth failed: " + (errObj.error || "Unknown error"));
+            let errorMsg = "Unknown error";
+            if (error && typeof error === "object" && "error" in error && typeof (error as { error?: unknown }).error === "string") {
+              errorMsg = (error as { error: string }).error;
+            }
+            alert("Google OAuth failed: " + errorMsg);
             return;
           }
           // Success: tokens stored, redirect to dashboard

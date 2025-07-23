@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "3",
+    "@next/bundle-analyzer": "^15.4.3",
     "@tailwindcss/postcss": "4.1.4",
     "@types/mime-types": "^3.0.1",
     "@types/node": "24.0.4",
@@ -76,6 +77,8 @@
     "lint": "next lint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "start": "next start",
-    "test:oauth": "node scripts/test-oauth.js"
+    "test:oauth": "node scripts/test-oauth.js",
+    "prebuild": "next lint && tsc --noEmit",
+    "analyze": "ANALYZE=true next build"
   }
 }

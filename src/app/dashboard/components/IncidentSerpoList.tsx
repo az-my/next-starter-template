@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog as ShadDialog, DialogContent as ShadDialogContent, DialogHeader as ShadDialogHeader, DialogTitle as ShadDialogTitle, DialogDescription as ShadDialogDescription } from "@/components/ui/dialog";
 import { Search, RefreshCw } from "lucide-react";
 import { flexRender } from "@tanstack/react-table";
 import { useIncidentTable, statusOptions, syncOptions } from "../hooks/useIncidentTable";
@@ -28,12 +28,12 @@ const IncidentDetailsDialog = ({ incident, onClose }: { incident: IncidentSerpo 
     const formatDate = (date: string | null) => date ? new Intl.DateTimeFormat("en-GB", { dateStyle: 'long', timeStyle: 'short' }).format(new Date(date)) : 'N/A';
 
     return (
-        <Dialog open={!!incident} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Incident: {incident.id_incident}</DialogTitle>
-                    <DialogDescription>Complete information about the incident.</DialogDescription>
-                </DialogHeader>
+        <ShadDialog open={!!incident} onOpenChange={(isOpen) => !isOpen && onClose()}>
+            <ShadDialogContent className="sm:max-w-md">
+                <ShadDialogHeader>
+                    <ShadDialogTitle>Incident: {incident.id_incident}</ShadDialogTitle>
+                    <ShadDialogDescription>Complete information about the incident.</ShadDialogDescription>
+                </ShadDialogHeader>
                 <div className="grid gap-3 py-4 text-sm [&>div]:grid [&>div]:grid-cols-[110px_1fr] [&>div]:items-start">
                     <div><span className="font-medium text-muted-foreground">Status</span><Badge>{incident.status}</Badge></div>
                     <div><span className="font-medium text-muted-foreground">Zone</span><span>{incident.crossing_zona}</span></div>
@@ -42,14 +42,15 @@ const IncidentDetailsDialog = ({ incident, onClose }: { incident: IncidentSerpo 
                     <div><span className="font-medium text-muted-foreground">Duration</span><span>{incident.duration || "N/A"}</span></div>
                     <div><span className="font-medium text-muted-foreground">Description</span><span className="break-words">{incident.description || "None"}</span></div>
                 </div>
-            </DialogContent>
-        </Dialog>
+            </ShadDialogContent>
+        </ShadDialog>
     );
 };
 
 
 export function IncidentSerpoList({ incidents, onSync, syncingId, onRefresh }: IncidentSerpoListProps) {
   const [incidentToView, setIncidentToView] = useState<IncidentSerpo | null>(null);
+  const [showRawDialog, setShowRawDialog] = useState(false);
 
   const { table, globalFilter, setGlobalFilter } = useIncidentTable({
     data: incidents,
@@ -92,6 +93,9 @@ export function IncidentSerpoList({ incidents, onSync, syncingId, onRefresh }: I
                 <SelectContent>{syncOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
               </Select>
               {onRefresh && <Button variant="outline" size="icon" onClick={onRefresh}><RefreshCw className="h-4 w-4" /></Button>}
+              <Button variant="secondary" size="sm" onClick={() => setShowRawDialog(true)}>
+                Show Raw
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -136,6 +140,17 @@ export function IncidentSerpoList({ incidents, onSync, syncingId, onRefresh }: I
           </div>
         </CardContent>
       </Card>
+
+      <ShadDialog open={showRawDialog} onOpenChange={setShowRawDialog}>
+        <ShadDialogContent className="max-w-2xl">
+          <ShadDialogHeader>
+            <ShadDialogTitle>Raw Incident Data</ShadDialogTitle>
+          </ShadDialogHeader>
+          <pre className="overflow-x-auto text-xs bg-muted p-4 rounded max-h-[60vh]">
+            {JSON.stringify(incidents, null, 2)}
+          </pre>
+        </ShadDialogContent>
+      </ShadDialog>
 
       <IncidentDetailsDialog 
         incident={incidentToView}

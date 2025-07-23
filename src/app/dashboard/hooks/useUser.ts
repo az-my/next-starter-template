@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/utils";
+import type { User, Session } from "@supabase/supabase-js";
+import type { GoogleTokens } from '@/types/google-tokens';
 
 export function useUser() {
-  const [user, setUser] = useState<any>(null);
-  const [session, setSession] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [googleTokens, setGoogleTokens] = useState<any>(null);
+  const [googleTokens, setGoogleTokens] = useState<GoogleTokens | null>(null);
 
   useEffect(() => {
     const getUserAndSession = async () => {
@@ -26,8 +28,8 @@ export function useUser() {
           setError(sessionError.message || "Failed to fetch session");
         }
         setSession(sessionData.session);
-      } catch (err: any) {
-        setError(err?.message || "Unknown error");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }

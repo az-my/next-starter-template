@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 // Simple count-up hook
 function useCountUp(to: number, duration = 1200) {
   const [value, setValue] = useState(0);
-  const raf = useRef<number>();
+  const raf = useRef<number>(0);
   useEffect(() => {
     let start: number | null = null;
     function animate(ts: number) {
@@ -18,7 +18,7 @@ function useCountUp(to: number, duration = 1200) {
       }
     }
     raf.current = requestAnimationFrame(animate);
-    return () => raf.current && cancelAnimationFrame(raf.current);
+    return () => { if (raf.current) cancelAnimationFrame(raf.current); };
   }, [to, duration]);
   return value;
 }

@@ -3,8 +3,8 @@ import { Card, CardTitle, CardDescription, CardContent, CardHeader, CardFooter }
 import { ConnectGoogleButton } from "@/components/ConnectGoogleButton";
 
 interface OverviewTabProps {
-  user: any;
-  googleTokens: any;
+  user: unknown;
+  googleTokens: unknown;
 }
 
 export function OverviewTab({ user, googleTokens }: OverviewTabProps) {

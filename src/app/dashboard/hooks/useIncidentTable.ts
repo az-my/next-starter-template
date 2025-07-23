@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, createElement } from "react";
+import { useState, useMemo, createElement } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -29,7 +29,7 @@ const formatDate = (dateString: string | null | undefined): string => {
     return new Intl.DateTimeFormat("en-GB", {
       year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
     }).format(new Date(dateString));
-  } catch (error) {
+  } catch {
     return "Invalid Date";
   }
 };

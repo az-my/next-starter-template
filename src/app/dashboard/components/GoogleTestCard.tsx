@@ -2,12 +2,13 @@
 import { useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import type { GoogleTokens } from '@/types/google-tokens';
 
-export function GoogleTestCard({ sheetId, folderId, googleTokens }: { sheetId: string; folderId: string; googleTokens: any }) {
+export function GoogleTestCard({ sheetId, folderId, googleTokens }: { sheetId: string; folderId: string; googleTokens: GoogleTokens }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [sheetResult, setSheetResult] = useState<string | null>(null);
   const [uploadResult, setUploadResult] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Real post to Google Sheet via API route
   const handlePostData = async () => {
@@ -22,14 +23,26 @@ export function GoogleTestCard({ sheetId, folderId, googleTokens }: { sheetId: s
           data: ["Test Name", "Test Value", new Date().toISOString()],
         }),
       });
-      const result: any = await res.json();
+      const result: unknown = await res.json();
       if (res.ok) {
         setSheetResult("✅ Data posted to sheet!");
       } else {
-        setSheetResult(`❌ Error: ${result.error}`);
+        // Try to extract error message if possible
+        let errorMsg = "Unknown error";
+        if (
+          typeof result === "object" &&
+          result !== null &&
+          "error" in result &&
+          typeof (result as { error?: unknown }).error === "string"
+        ) {
+          errorMsg = (result as { error: string }).error;
+        }
+        setSheetResult(`❌ Error: ${errorMsg}`);
       }
-    } catch (err: any) {
-      setSheetResult(`❌ Error: ${err.message}`);
+    } catch (err: unknown) {
+      let message = "Unknown error";
+      if (err instanceof Error) message = err.message;
+      setSheetResult(`❌ Error: ${message}`);
     }
   };
 
@@ -53,14 +66,26 @@ export function GoogleTestCard({ sheetId, folderId, googleTokens }: { sheetId: s
         method: "POST",
         body: formData,
       });
-      const result: any = await res.json();
+      const result: unknown = await res.json();
       if (res.ok) {
         setUploadResult("✅ File uploaded to Drive folder!");
       } else {
-        setUploadResult(`❌ Error: ${result.error}`);
+        // Try to extract error message if possible
+        let errorMsg = "Unknown error";
+        if (
+          typeof result === "object" &&
+          result !== null &&
+          "error" in result &&
+          typeof (result as { error?: unknown }).error === "string"
+        ) {
+          errorMsg = (result as { error: string }).error;
+        }
+        setUploadResult(`❌ Error: ${errorMsg}`);
       }
-    } catch (err: any) {
-      setUploadResult(`❌ Error: ${err.message}`);
+    } catch (err: unknown) {
+      let message = "Unknown error";
+      if (err instanceof Error) message = err.message;
+      setUploadResult(`❌ Error: ${message}`);
     }
     setUploading(false);
   };

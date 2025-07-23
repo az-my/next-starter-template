@@ -9,7 +9,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<unknown>(null);
   const router = useRouter();
 
   useEffect(() => {

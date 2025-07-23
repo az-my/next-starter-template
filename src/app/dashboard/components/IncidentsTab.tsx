@@ -4,10 +4,11 @@ import { GoogleAuthAlert } from "./ui/GoogleAuthAlert";
 import { SyncingBadge } from "./ui/SyncingBadge";
 import { LoadingSkeleton } from "./ui/LoadingSkeleton";
 import { ErrorAlert } from "./ui/ErrorAlert";
-import { RefreshCw } from "lucide-react";
+import { IncidentSerpo } from "@/types/incident-serpo";
+import type { GoogleTokens } from '@/types/google-tokens';
 
 interface IncidentsTabProps {
-  googleTokens: any;
+  googleTokens: GoogleTokens | null;
 }
 
 export function IncidentsTab({ googleTokens }: IncidentsTabProps) {
@@ -27,7 +28,7 @@ export function IncidentsTab({ googleTokens }: IncidentsTabProps) {
   // Configuration - these should ideally come from environment variables or user settings
   const SHEET_ID = "your-google-sheet-id"; // Replace with actual sheet ID
   
-  const handleSyncWithSheetId = (incident: any) => {
+  const handleSyncWithSheetId = (incident: IncidentSerpo) => {
     handleSync(incident, SHEET_ID);
   };
 

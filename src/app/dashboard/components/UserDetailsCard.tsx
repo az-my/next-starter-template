@@ -1,47 +1,78 @@
-
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { GoogleTokens } from '@/types/google-tokens';
 
-type Props = {
-  user: any;
-  googleTokens: any;
-  sheetId?: string;
-  folderId?: string;
-};
+// --- Type Definitions ---
 
-export function UserDetailsCard({ user, googleTokens, sheetId, folderId }: Props) {
-  const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-  const avatarUrl = user.user_metadata?.avatar_url;
+// Corrected User interface with all properties and a closing brace
+export interface User {
+  user_metadata?: {
+    full_name?: string;
+    avatar_url?: string;
+  };
+  app_metadata?: {
+    provider?: string;
+  };
+  email?: string;
+}
+
+// Defined Props interface for the component
+interface Props {
+  user: User | null;
+  googleTokens: GoogleTokens | null;
+  sheetId?: string | null;
+  folderId?: string | null;
+}
+
+// --- Component Definition ---
+
+export function UserDetailsCard(props: Props) {
+  const { user, googleTokens, sheetId, folderId } = props;
 
   // Connection status states
-  const [sheetStatus, setSheetStatus] = useState<'pending'|'success'|'error'>('pending');
-  const [folderStatus, setFolderStatus] = useState<'pending'|'success'|'error'>('pending');
+  const [sheetStatus, setSheetStatus] = useState<'pending' | 'success' | 'error'>('pending');
+  const [folderStatus, setFolderStatus] = useState<'pending' | 'success' | 'error'>('pending');
 
-  // Simulate async check for Google Sheet and Drive folder access
+  // Effect for checking Google Sheet access
   useEffect(() => {
-    if (!googleTokens) {
+    if (!googleTokens || !sheetId) {
       setSheetStatus('error');
+      return;
+    }
+    setSheetStatus('pending');
+    // Simulate an async API call to check sheet access
+    const timer = setTimeout(() => setSheetStatus('success'), 600);
+    return () => clearTimeout(timer); // Cleanup on unmount or dependency change
+  }, [googleTokens, sheetId]);
+
+  // Effect for checking Google Drive folder access
+  useEffect(() => {
+    if (!googleTokens || !folderId) {
       setFolderStatus('error');
       return;
     }
-    // Replace with real API calls in production
-    if (sheetId) {
-      setSheetStatus('pending');
-      setTimeout(() => setSheetStatus('success'), 600); // Simulate success
-    }
-    if (folderId) {
-      setFolderStatus('pending');
-      setTimeout(() => setFolderStatus('success'), 600); // Simulate success
-    }
-  }, [googleTokens, sheetId, folderId]);
+    setFolderStatus('pending');
+    // Simulate an async API call to check folder access
+    const timer = setTimeout(() => setFolderStatus('success'), 600);
+    return () => clearTimeout(timer); // Cleanup on unmount or dependency change
+  }, [googleTokens, folderId]);
+
+  // Render a loading or empty state if there's no user
+  if (!user) {
+    return <Card className="p-4 w-full max-w-xl bg-muted rounded-lg mt-4">Loading user...</Card>;
+  }
+
+  const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+  const avatarUrl = user.user_metadata?.avatar_url;
 
   return (
     <Card className="p-4 w-full max-w-xl bg-muted rounded-lg mt-4">
+      {/* User Info Header */}
       <div className="flex items-center gap-4 mb-4">
         <Avatar>
           <AvatarImage src={avatarUrl} alt={userName} />
-          <AvatarFallback>{userName[0]}</AvatarFallback>
+          <AvatarFallback>{userName ? userName[0].toUpperCase() : 'U'}</AvatarFallback>
         </Avatar>
         <div>
           <h2 className="text-lg font-semibold">{userName}</h2>
@@ -50,9 +81,11 @@ export function UserDetailsCard({ user, googleTokens, sheetId, folderId }: Props
       </div>
       <div className="text-sm mb-4">
         <div>
-          You are currently logged in using <strong>{user.app_metadata?.provider ?? 'N/A'}</strong>.
+          You are currently logged in using <strong>{user.app_metadata?.provider ?? 'email'}</strong>.
         </div>
       </div>
+
+      {/* Google Connection Status */}
       {googleTokens ? (
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-2">

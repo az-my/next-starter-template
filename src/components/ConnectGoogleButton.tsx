@@ -13,10 +13,9 @@ interface ConnectGoogleButtonProps {
 
 export function ConnectGoogleButton({ showStatusOnly = false }: ConnectGoogleButtonProps) {
   const [status, setStatus] = useState<'connected' | 'not_connected' | 'loading' | 'error'>('loading');
-  const [authUrl, setAuthUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [errorDetails, setErrorDetails] = useState<any>(null);
-  const [googleInfo, setGoogleInfo] = useState<any>(null);
+  const [errorDetails, setErrorDetails] = useState<unknown>(null);
+  const [googleInfo, setGoogleInfo] = useState<Record<string, unknown> | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const fetchStatus = async () => {
@@ -33,7 +32,7 @@ export function ConnectGoogleButton({ showStatusOnly = false }: ConnectGoogleBut
         return;
       }
       // Fix: cast data to expected type
-      const data = (await res.json()) as { connected?: boolean; tokens?: any; message?: string };
+      const data = (await res.json()) as { connected?: boolean; tokens?: Record<string, unknown>; message?: string };
       setStatus(data.connected ? 'connected' : 'not_connected');
       if (data.connected && data.tokens) {
         setGoogleInfo(data.tokens);
@@ -78,7 +77,6 @@ export function ConnectGoogleButton({ showStatusOnly = false }: ConnectGoogleBut
         return;
       }
       const data = (await res.json()) as { url?: string };
-      setAuthUrl(data.url ?? null);
       if (data.url) {
         window.location.href = data.url;
       }
@@ -116,20 +114,24 @@ export function ConnectGoogleButton({ showStatusOnly = false }: ConnectGoogleBut
           <Card className="w-full mt-2 bg-muted/50">
             <CardContent className="pt-4 pb-2 px-4 text-sm">
               {message && (
-                <Alert variant="success" className="mb-2 bg-green-50 text-green-700 border-green-200">
+                <Alert variant="default" className="mb-2 bg-green-50 text-green-700 border-green-200">
                   <CheckCircle2 className="h-4 w-4" />
                   <AlertDescription>{message}</AlertDescription>
                 </Alert>
               )}
               <div className="grid grid-cols-2 gap-1 text-xs">
                 <div className="text-muted-foreground">Scope:</div>
-                <div className="font-medium">{googleInfo.scope ?? 'N/A'}</div>
+                <div className="font-medium">{String(googleInfo.scope ?? 'N/A')}</div>
                 
                 <div className="text-muted-foreground">Token Type:</div>
-                <div className="font-medium">{googleInfo.token_type ?? 'N/A'}</div>
+                <div className="font-medium">{String(googleInfo.token_type ?? 'N/A')}</div>
                 
                 <div className="text-muted-foreground">Expiry:</div>
-                <div className="font-medium">{googleInfo.expiry_date ? new Date(googleInfo.expiry_date).toLocaleString() : 'N/A'}</div>
+                <div className="font-medium">{
+                  googleInfo.expiry_date && (typeof googleInfo.expiry_date === 'string' || typeof googleInfo.expiry_date === 'number')
+                    ? new Date(googleInfo.expiry_date).toLocaleString()
+                    : 'N/A'
+                }</div>
               </div>
             </CardContent>
           </Card>
@@ -147,7 +149,7 @@ export function ConnectGoogleButton({ showStatusOnly = false }: ConnectGoogleBut
           <AlertDescription>{error}</AlertDescription>
         </Alert>
         
-        {errorDetails && (
+        {(typeof errorDetails === 'string' || (typeof errorDetails === 'object' && errorDetails !== null)) && (
           <Collapsible className="w-full">
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="sm" className="w-full mt-2 text-xs">
@@ -158,7 +160,7 @@ export function ConnectGoogleButton({ showStatusOnly = false }: ConnectGoogleBut
             <CollapsibleContent>
               <Card className="mt-2 bg-destructive/5 border-destructive/20">
                 <CardContent className="pt-4 text-xs">
-                  <pre className="whitespace-pre-wrap break-words text-xs">{JSON.stringify(errorDetails, null, 2)}</pre>
+                  <pre className="whitespace-pre-wrap break-words text-xs">{typeof errorDetails === 'string' ? errorDetails : JSON.stringify(errorDetails, null, 2)}</pre>
                   <div className="mt-2 text-destructive">
                     <strong>Potential root causes:</strong>
                     <ul className="list-disc ml-5 mt-1 space-y-1">

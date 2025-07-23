@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "./hooks/useUser";
 import { DashboardLayout } from "./components/DashboardLayout";
@@ -12,7 +11,6 @@ import { SettingsTab } from "./components/SettingsTab";
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading, error, googleTokens } = useUser();
-  const [activeTab, setActiveTab] = useState("overview");
   
   // Redirect if not logged in
   if (!loading && !user) {
@@ -23,7 +21,7 @@ export default function DashboardPage() {
   return (
     <DashboardLayout loading={loading} error={error}>
       <main className="flex flex-col gap-8 p-6 w-full h-full">
-        <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
+        <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-3 md:w-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="incidents">Incidents</TabsTrigger>
